@@ -30,17 +30,19 @@ Processador RISC-V de 32 bits com pipeline de 5 estágios implementado em System
 | J-type             | 2         | 0             | 2        |
 | **Total**          | **37**    | **8**         | **29**   |
 
-### Instruções a implementar — Etapa 01
+### Instruções a implementar — Etapa 01 ✅ (28/10/26)
 
 #### Aritmética, lógica e deslocamentos (R-type)
 
 | # | Instrução | Tipo | Opcode  | Status |
 |---|-----------|------|---------|:------:|
-| 1 | `XOR`     | R    | 0110011 | ❌ |
-| 2 | `SLL`     | R    | 0110011 | ❌ |
-| 3 | `SRL`     | R    | 0110011 | ❌ |
-| 4 | `SRA`     | R    | 0110011 | ❌ |
-| 5 | `SLTU`    | R    | 0110011 | ❌ |
+| 1 | `XOR`     | R    | 0110011 | ✅ |
+| 2 | `SLL`     | R    | 0110011 | ✅ |
+| 3 | `SRL`     | R    | 0110011 | ✅ |
+| 4 | `SRA`     | R    | 0110011 | ✅ |
+| 5 | `SLTU`    | R    | 0110011 | ✅ |
+
+- Módulos alterados: ALU (cálculo das instruções) e ALU_Ctrl (manda sinal de acordo com instrução).
 
 #### Aritmética, lógica e deslocamentos com imediatos (I-type)
 
