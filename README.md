@@ -21,82 +21,92 @@ Processador RISC-V de 32 bits com pipeline de 5 estágios implementado em System
 
 | Categoria          | Total ISA | Implementadas | Faltando |
 |--------------------|:---------:|:-------------:|:--------:|
-| R-type             | 10        | 5             | 5        |
-| I-type aritmético  | 9         | 0             | 9        |
-| I-type load        | 5         | 1 (LW)        | 4        |
-| S-type             | 3         | 1 (SW)        | 2        |
-| B-type             | 6         | 1 (BEQ)       | 5        |
-| U-type             | 2         | 0             | 2        |
-| J-type             | 2         | 0             | 2        |
-| **Total**          | **37**    | **8**         | **29**   |
+| R-type             | 10        | 10            | 0        |
+| I-type aritmético  | 8         | 8             | 0        |
+| I-type load        | 5         | 5             | 0        |
+| S-type             | 3         | 3             | 0        |
+| B-type             | 6         | 6             | 0        |
+| U-type             | 2         | 2             | 0        |
+| J-type             | 2         | 2             | 0        |
+| **Total**          | **37**    | **28**         | **0**   |
 
-### Instruções a implementar — Etapa 01
+### - Etapa 01 ✅ (28/10/26)
 
 #### Aritmética, lógica e deslocamentos (R-type)
 
 | # | Instrução | Tipo | Opcode  | Status |
 |---|-----------|------|---------|:------:|
-| 1 | `XOR`     | R    | 0110011 | ❌ |
-| 2 | `SLL`     | R    | 0110011 | ❌ |
-| 3 | `SRL`     | R    | 0110011 | ❌ |
-| 4 | `SRA`     | R    | 0110011 | ❌ |
-| 5 | `SLTU`    | R    | 0110011 | ❌ |
+| 1 | `XOR`     | R    | 0110011 | ✅ |
+| 2 | `SLL`     | R    | 0110011 | ✅ |
+| 3 | `SRL`     | R    | 0110011 | ✅ |
+| 4 | `SRA`     | R    | 0110011 | ✅ |
+| 5 | `SLTU`    | R    | 0110011 | ✅ |
 
-#### Aritmética, lógica e deslocamentos com imediatos (I-type)
+- Módulos alterados: ALU (cálculo das instruções aritmeticas implementadas) e ALU_Ctrl (manda sinal de acordo com instrução).
 
-| # | Instrução | Tipo | Opcode  | Status |
-|---|-----------|------|---------|:------:|
-| 1 | `ADDI`    | I    | 0010011 | ❌ |
-| 2 | `ANDI`    | I    | 0010011 | ❌ |
-| 3 | `ORI`     | I    | 0010011 | ❌ |
-| 4 | `SLTI`    | I    | 0010011 | ❌ |
-| 5 | `SLLI`    | I    | 0010011 | ❌ |
-| 6 | `SRLI`    | I    | 0010011 | ❌ |
-| 7 | `SRAI`    | I    | 0010011 | ❌ |
-
-### Instruções a implementar — Etapa 02
-
-#### Acesso à memória — loads (I-type)
+### - Etapa 02 ✅
+#### Aritmética, lógica e deslocamentos com imediatos (I-type) ✅ (04/11/2026)
 
 | # | Instrução | Tipo | Opcode  | Status |
 |---|-----------|------|---------|:------:|
-| 1 | `LB`      | I    | 0000011 | ❌ |
-| 2 | `LH`      | I    | 0000011 | ❌ |
-| 3 | `LBU`     | I    | 0000011 | ❌ |
-| 4 | `LHU`     | I    | 0000011 | ❌ |
+| 1 | `ADDI`    | I    | 0010011 | ✅ |
+| 2 | `ANDI`    | I    | 0010011 | ✅ |
+| 3 | `ORI`     | I    | 0010011 | ✅ |
+| 4 | `SLTI`    | I    | 0010011 | ✅ |
+| 5 | `SLLI`    | I    | 0010011 | ✅ |
+| 6 | `SRLI`    | I    | 0010011 | ✅ |
+| 7 | `SRAI`    | I    | 0010011 | ✅ |
+| 8 | `XORI`    | I    | 0010011 | ✅ |
 
-#### Acesso à memória — stores (S-type)
+- Módulos alterados: ALU_Ctrl (manda sinal de acordo com instrução) e pl_sign_ext para usar o valor do imediato.
 
-| # | Instrução | Tipo | Opcode  | Status |
-|---|-----------|------|---------|:------:|
-| 1 | `SB`      | S    | 0100011 | ❌ |
-| 2 | `SH`      | S    | 0100011 | ❌ |
-
-#### Desvios condicionais (B-type)
-
-| # | Instrução | Tipo | Opcode  | Status |
-|---|-----------|------|---------|:------:|
-| 1 | `BNE`     | B    | 1100011 | ❌ |
-| 2 | `BLT`     | B    | 1100011 | ❌ |
-| 3 | `BGE`     | B    | 1100011 | ❌ |
-| 4 | `BLTU`    | B    | 1100011 | ❌ |
-| 5 | `BGEU`    | B    | 1100011 | ❌ |
-
-#### Jumps (J-type)
+#### Imediato superior (U-type) ✅ (05/11/26)
 
 | # | Instrução | Tipo | Opcode  | Status |
 |---|-----------|------|---------|:------:|
-| 1 | `JAL`     | J    | 1101111 | ❌ |
-| 2 | `JALR`    | I    | 1100111 | ❌ |
+| 1 | `LUI`     | U    | 0110111 | ✅ |
+| 2 | `AUIPC`   | U    | 0010111 | ✅ |
 
-#### Imediato superior (U-type)
+- Alterações: fowarding do srcA no módulo pl_datapath (scrA = 0 para lui e scrA = pc para auipc); e, para suportar todas as instruções, ALUop passou a ter 3 bits (modificado em todos os módulos em que é usado).
+
+### - Etapa 03 ✅
+
+#### Acesso à memória — loads (I-type) ✅ (10/11/26)
 
 | # | Instrução | Tipo | Opcode  | Status |
 |---|-----------|------|---------|:------:|
-| 1 | `LUI`     | U    | 0110111 | ❌ |
-| 2 | `AUIPC`   | U    | 0010111 | ❌ |
+| 1 | `LB`      | I    | 0000011 | ✅ |
+| 2 | `LH`      | I    | 0000011 | ✅ |
+| 3 | `LBU`     | I    | 0000011 | ✅ |
+| 4 | `LHU`     | I    | 0000011 | ✅ |
 
----
+#### Acesso à memória — stores (S-type) ✅
+
+| # | Instrução | Tipo | Opcode  | Status |
+|---|-----------|------|---------|:------:|
+| 1 | `SB`      | S    | 0100011 | ✅ |
+| 2 | `SH`      | S    | 0100011 | ✅ |
+
+- Alterações: módulo da memória de dados...
+
+#### Desvios condicionais (B-type) ✅ (17/11/26)
+
+| # | Instrução | Tipo | Opcode  | Status |
+|---|-----------|------|---------|:------:|
+| 1 | `BNE`     | B    | 1100011 | ✅ |
+| 2 | `BLT`     | B    | 1100011 | ✅ |
+| 3 | `BGE`     | B    | 1100011 | ✅ |
+| 4 | `BLTU`    | B    | 1100011 | ✅ |
+| 5 | `BGEU`    | B    | 1100011 | ✅ |
+
+#### Jumps (J-type) ✅
+
+| # | Instrução | Tipo | Opcode  | Status |
+|---|-----------|------|---------|:------:|
+| 1 | `JAL`     | J    | 1101111 | ✅ |
+| 2 | `JALR`    | I    | 1100111 | ✅ |
+
+- Alterações: módulo pl_datapath...
 
 ## Arquitetura
 
@@ -147,10 +157,16 @@ Seleção: `alu_result[10] = 1` redireciona o acesso ao controlador MMIO (`pl_mm
 
 | Operation | Instrução |
 |-----------|-----------|
-| `4'd01` ADD | LW, SW, ADD |
+| `4'd01` ADD | LW, SW, ADD, ADDI |
 | `4'd02` SUB | BEQ (comparação) |
+| `4'd02` XOR | XOR, XORI |
 | `4'd04` OR  | OR |
 | `4'd05` AND | AND |
+| `4'd06` SLL | SLL, SLLI |
+| `4'd07` SRL | SRL, SRLI |
+| `4'd08` SRA | SRA |
+| `4'd09` SLTU | SLTU |
+| `4'd10` scrB | LUI |
 | `4'd11` SLT | SLT |
 
 ---
