@@ -35,7 +35,7 @@ module pl_datapath (
     input  logic        MemRead,
     input  logic        MemWrite,
     input  logic        Branch,
-    input  logic [1:0]  ALUOp,
+    input  logic [2:0]  ALUOp, // mudança pra 3 bits
 
     // Codigo de operacao da ALU (pl_alu_ctrl, usa campos do estagio EX)
     input  logic [3:0]  ALU_CC,
@@ -44,7 +44,7 @@ module pl_datapath (
     output logic [6:0]  Opcode,       // opcode do estagio ID (para pl_control)
     output logic [2:0]  Funct3_EX,    // funct3 do estagio EX (para pl_alu_ctrl)
     output logic [6:0]  Funct7_EX,    // funct7 do estagio EX (para pl_alu_ctrl)
-    output logic [1:0]  ALUOp_EX,     // ALUOp do estagio EX  (para pl_alu_ctrl)
+    output logic [2:0]  ALUOp_EX,     // ALUOp do estagio EX  (para pl_alu_ctrl)
 
     output logic [31:0] PC,           // PC atual (testbench / debug)
 
@@ -72,7 +72,7 @@ module pl_datapath (
     // PC
     logic [31:0] pc_reg, pc_plus4;
 
-    // Registradores de pipeline
+    // Registradores de pipelineHF
     if_id_t  if_id;
     id_ex_t  id_ex;
     ex_mem_t ex_mem;
@@ -184,7 +184,7 @@ module pl_datapath (
             id_ex.reg_write  <= 1'b0;
             id_ex.mem_read   <= 1'b0;
             id_ex.mem_write  <= 1'b0;
-            id_ex.alu_op     <= 2'b00;
+            id_ex.alu_op     <= 3'b000;
             id_ex.branch     <= 1'b0;
             id_ex.pc         <= 32'b0;
             id_ex.rd1        <= 32'b0;
@@ -201,7 +201,7 @@ module pl_datapath (
             id_ex.reg_write  <= 1'b0;
             id_ex.mem_read   <= 1'b0;
             id_ex.mem_write  <= 1'b0;
-            id_ex.alu_op     <= 2'b00;
+            id_ex.alu_op     <= 3'b000;
             id_ex.branch     <= 1'b0;
             id_ex.pc         <= 32'b0;
             id_ex.rd1        <= 32'b0;
@@ -252,13 +252,22 @@ module pl_datapath (
     );
 
     // Mux de forwarding para SrcA
-    always_comb begin
-        case (fwd_a)
-            2'b10:   fwd_srca = ex_mem.alu_result;
-            2'b01:   fwd_srca = wb_data;
-            default: fwd_srca = id_ex.rd1;
-        endcase
-    end
+		always_comb begin
+		 case (id_ex.alu_op)
+
+			  3'b100: fwd_srca = 32'b0;    // LUI
+
+			  3'b101: fwd_srca = id_ex.pc; // AUIPC
+
+			  default: begin
+					case (fwd_a)
+						 2'b10:   fwd_srca = ex_mem.alu_result;
+						 2'b01:   fwd_srca = wb_data;
+						 default: fwd_srca = id_ex.rd1;
+					endcase
+			  end
+		 endcase
+	end
 
     // Mux de forwarding para SrcB (antes do mux ALUSrc)
     always_comb begin
@@ -268,21 +277,58 @@ module pl_datapath (
             default: fwd_srcb = id_ex.rd2;
         endcase
     end
+	  
 
     // Mux ALUSrc: imediato ou registrador
     assign alu_srcb = id_ex.alu_src ? id_ex.imm_ext : fwd_srcb;
+	 
+	 logic menor_que;
+	 logic unsigned_menor_que;
+	 logic salto_condicao;
 
     pl_alu alu (
         .SrcA      (fwd_srca),
         .SrcB      (alu_srcb),
         .Operation (ALU_CC),
         .ALUResult (alu_result),
-        .Zero      (zero)
+        .Zero      (zero),
+		  .menor_que (menor_que),
+		  .unsigned_menor_que (unsigned_menor_que)
     );
+	 
+	 always_comb begin
+			case (id_ex.funct3)
+				3'b000: salto_condicao = zero; //beq: salto quando rs1==rs2
+				3'b001: salto_condicao = ~zero; //bne: salto quando rs1 != rs2;
+				3'b100: salto_condicao = menor_que; //blt: salt quando rs1 < rs2 (signed)
+				3'b101: salto_condicao = ~menor_que; //bge: salto quando rs1 >= rs2 (signed)
+				3'b110: salto_condicao = unsigned_menor_que; //bltu: salto quando rs1 < rs2 (unsigned)
+				3'b111: salto_condicao = ~unsigned_menor_que; //bgeu: salto se rs1 >= rs2 (unsigned)
+				default: salto_condicao = 1'b0;
+			endcase
+		end
+		
+		logic jal;
+		logic jalr;
+		logic salto;
+		
+		assign jal   = (id_ex.alu_op == 3'b110);
+		assign jalr  = (id_ex.alu_op == 3'b111);
+		assign salto = jal | jalr;
+
+		 // Calculo do endereco de destino do salto
+		 always_comb begin
+			  if (jalr) begin
+					branch_target = (fwd_srca + id_ex.imm_ext) & 32'hFFFFFFFE;
+			  end else begin
+					branch_target = id_ex.pc + id_ex.imm_ext;
+			  end
+		 end 
+		
 
     // Branch resolvido no estagio EX (flush 2 instrucoes se taken)
-    assign branch_target = id_ex.pc + id_ex.imm_ext;
-    assign pc_src        = id_ex.branch && zero;
+    
+    assign pc_src = (id_ex.branch && salto_condicao) || salto; // salta se (a instrucao for um branch E a condicao for verdadeira) OU (a instrucao for um jump)
 
     // =========================================================================
     // Registrador EX/MEM
@@ -297,6 +343,7 @@ module pl_datapath (
             ex_mem.write_data  <= 32'b0;
             ex_mem.rd          <= 5'b0;
             ex_mem.funct3      <= 3'b0;
+				
         end else begin
             ex_mem.mem_to_reg  <= id_ex.mem_to_reg;
             ex_mem.reg_write   <= id_ex.reg_write;
@@ -306,6 +353,13 @@ module pl_datapath (
             ex_mem.write_data  <= fwd_srcb;   // rs2 adiantado (para SW/MMIO)
             ex_mem.rd          <= id_ex.rd;
             ex_mem.funct3      <= id_ex.funct3;
+				
+				if (salto) begin
+                ex_mem.alu_result <= id_ex.pc + 32'd4; // salva o endereco de retorno
+            end else begin
+                ex_mem.alu_result <= alu_result;       // salva a conta da ULA
+            end
+
         end
     end
 
@@ -315,13 +369,16 @@ module pl_datapath (
     assign mmio_sel = ex_mem.alu_result[10];
 
     pl_dmem dmem (
-        .clk       (clk),
-        .MemWrite  (ex_mem.mem_write & ~mmio_sel),
-        .addr      (ex_mem.alu_result[9:2]),
-        .WriteData (ex_mem.write_data),
-        .ReadData  (dmem_rd)
+    .Funct3      (ex_mem.funct3),
+    .ByteOffset  (ex_mem.alu_result[1:0]),
+    .clk         (clk),
+    .MemWrite    (ex_mem.mem_write & ~mmio_sel),
+    .addr        (ex_mem.alu_result[9:2]),
+    .WriteData   (ex_mem.write_data),
+    .ReadData    (dmem_rd)
+	 
     );
-
+  
     pl_mmio mmio (
         .clk       (clk),
         .rst_n     (rst_n),
