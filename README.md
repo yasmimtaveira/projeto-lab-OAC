@@ -28,7 +28,7 @@ Processador RISC-V de 32 bits com pipeline de 5 estágios implementado em System
 | B-type             | 6         | 6             | 0        |
 | U-type             | 2         | 2             | 0        |
 | J-type             | 2         | 2             | 0        |
-| **Total**          | **37**    | **28**         | **0**   |
+| **Total**          | **36**    | **36**         | **0**   |
 
 ### - Etapa 01 ✅ (28/10/26)
 
