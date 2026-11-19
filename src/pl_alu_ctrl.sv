@@ -52,14 +52,13 @@ module pl_alu_ctrl (
                     3'h2: Operation = 4'd11; // SLTI
                     3'h1: Operation = 4'd06; // SLLI
                     3'h5: Operation =  Funct7[5] ? 4'd08: 4'd07; // SRAI ou SRLI
-						  3'h4: Operation = 4'd03; //xorI
-						  
+					3'h4: Operation = 4'd03; //xorI
                     default: Operation = 4'd00; // ainda conferir ------------
                 endcase
             end
 				
-				3'b100: Operation = 4'd01; // LUI: 0 + imediato (imp)
-				3'b101: Operation = 4'd01; // AUIPC: PC + imediato (imp)
+			3'b100: Operation = 4'd01; // LUI: 0 + imediato (imp)
+			3'b101: Operation = 4'd01; // AUIPC: PC + imediato (imp)
 
             default: Operation = 4'd01;
         endcase
