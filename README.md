@@ -106,7 +106,8 @@ Processador RISC-V de 32 bits com pipeline de 5 estágios implementado em System
 | 1 | `JAL`     | J    | 1101111 | ✅ |
 | 2 | `JALR`    | I    | 1100111 | ✅ |
 
-- Alterações: módulo pl_datapath...
+- Alterações: pl_alu: expandida para gerar flags de comparação (zero, menor_que e unsigned_menor_que), para indicar o resultado da comparação entre os operandos SrcA e SrcB, repassando as flags diretamente para o Datapath. pl_datapath: modificado para selecionar as flags da ULA via funct3 na resolução de desvios, calcular os endereços alvo de saltos zerando o bit menos significativo no JALR, além de salvar o endereço de retorno PC + 4 no pipeline durante saltos incondicionais. pl_sign_ext : modificado para extrair e estender o sinal dos imediatos das novas instruções, reorganizando os bits do formato J-Type e preenchendo os 12 bits menos significativos com zeros no formato U-Type).
+
 
 ## Arquitetura
 
