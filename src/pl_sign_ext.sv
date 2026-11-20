@@ -43,6 +43,8 @@ module pl_sign_ext (
 				
 			JAL: ImmExt = {{12{Instr[31]}}, Instr[19:12], Instr[20], Instr[30:21], 1'b0};
 
+            JALR: ImmExt = {{20{Instr[31]}}, Instr[31:20]};
+
             default: ImmExt = 32'b0;
         endcase
     end
