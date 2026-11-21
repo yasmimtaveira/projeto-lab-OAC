@@ -58,7 +58,7 @@ Processador RISC-V de 32 bits com pipeline de 5 estágios implementado em System
 | 7 | `SRAI`    | I    | 0010011 | ✅ |
 | 8 | `XORI`    | I    | 0010011 | ✅ |
 
-- Módulos alterados: ALU_Ctrl (manda sinal de acordo com instrução) e pl_sign_ext para usar o valor do imediato.
+- Módulos alterados: ALU_Ctrl (manda sinal de acordo com instrução) e pl_sign_ext para usar o valor do imediato (extende o sinal para o imediato ter 32 bits).
 
 #### Imediato superior (U-type) ✅ (05/11/26)
 
