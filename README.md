@@ -87,7 +87,7 @@ Processador RISC-V de 32 bits com pipeline de 5 estágios implementado em System
 | 1 | `SB`      | S    | 0100011 | ✅ |
 | 2 | `SH`      | S    | 0100011 | ✅ |
 
-- Alterações: módulo da memória de dados...
+- Alterações: módulo da pl_dmem(para as instruções de SB e SH monta uma nova palavra e seleciona qual o byte da WriteData de acordo com o Byteoffset selecionado e para as instruções de load, com o byteoffset e qual a quantidade de byte definida, lê da memória)
 
 #### Desvios condicionais (B-type) ✅ (17/11/26)
 
